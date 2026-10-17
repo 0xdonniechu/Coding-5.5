@@ -41,25 +41,33 @@ Lean defaults in `~/.claude`; a repo that needs more turns it on in `.claude/set
   on. Do not use it while a connector is still needed for coding.
 - Off for a repo: the owner turns each one off in `/mcp`. The starter kit can only list them.
 - One session: `ENABLE_CLAUDEAI_MCP_SERVERS=false claude`.
+- A claude.ai account shared with other people: never disconnect a connector or delete a synced
+  skill on claude.ai, since that removes it for everyone. Turn connectors off in `/mcp`, and
+  synced skills off with `skillOverrides` in `~/.claude/settings.json` (next section).
 
-### Personal skills (`~/.claude/skills`)
-- `"skillOverrides": {"<skill>": "<value>"}`, value `on`, `name-only`, `user-invocable-only` or
-  `off`. Plugin skills are not affected.
-- Global (see the caveat below): rarely used skills at `user-invocable-only` in `~/.claude/settings.json`.
+### Personal and claude.ai-synced skills
+- `"skillOverrides": {"<skill>": "<value>"}`, value `on`, `name-only`, `user-invocable-only` (only
+  `/name` invokes it) or `off` (nothing invokes it). Plugin skills are not affected.
+- Personal skills (`~/.claude/skills`) are keyed by name. Skills synced from claude.ai are keyed
+  `anthropic-skills:<name>`.
+- Global: rarely used skills at `user-invocable-only`, unrelated ones at `off`, in
+  `~/.claude/settings.json`. Observed 2026-10-17: a user-scope override applies to both kinds
+  (`/skills` labels them `user-only` or shows them off).
 - On for a repo: `"on"` in `.claude/settings.local.json`.
-- Not verified: the docs do not say outright that a user-scope `skillOverrides` applies to
-  `~/.claude/skills`. After writing it, the owner opens `/skills` to see the real state.
+- Observed 2026-10-17: turning skills off in the `/skills` menu wrote `"off"` entries to the open
+  repo's `.claude/settings.local.json`; `~/.claude/settings.json` was unchanged. By precedence,
+  those entries win over the global value in that repo. Make global choices in
+  `~/.claude/settings.json`, and clear menu-made entries from a repo once they are global.
 - A skill you only ever invoke by hand: put `disable-model-invocation: true` in its frontmatter
   instead of an override.
 
-## Global defaults (set once, outside this skill)
+## Global defaults (set once per machine, outside this skill)
 
 The starter kit only makes context smaller once the global defaults are lean:
-- `enabledPlugins`: platform plugins the machine's repos rarely use set to `false`.
-- `skillOverrides`: skills rarely used while coding at `user-invocable-only` (check in `/skills`
-  that it applies; see the caveat above).
-- User-scope MCP holds only servers most repos use. The rest are in `~/.claude/mcp-catalog.json`.
-- Record on each machine, in this file's installed copy or the owner's notes, when they were set.
+- `enabledPlugins` and `skillOverrides`: the guide's `global/settings-defaults.json`, merged by
+  `install.py --settings`; `install.py --check` reports drift. Change them there, not by hand.
+- User-scope MCP holds only servers most repos use. The rest are in `~/.claude/mcp-catalog.json`,
+  written per machine (see the guide's README, "New machine").
 
 ## What to turn on
 

@@ -5,9 +5,14 @@
                                        (a differing file is backed up first), with templates/project-CLAUDE.md
                                        copied into the starter-kit skill
   python scripts/install.py --global   also put global/CLAUDE.md into ~/.claude/CLAUDE.md, between markers
+  python scripts/install.py --settings also merge global/settings-defaults.json (enabledPlugins, skillOverrides)
+                                       into ~/.claude/settings.json, backing it up first
   python scripts/install.py --check    change nothing; exit 1 if the installed copy differs from this repo
 
-It never edits settings.json: it only reports the main session model and its effort there.
+settings.json is written only with --settings, and only the entries listed in global/settings-defaults.json;
+every other key keeps its value. The model and effort there stay the owner's: they are only reported.
+With --settings (also under --check) it refuses, exit 2 and nothing written, when settings.json is not a
+UTF-8 JSON object or its enabledPlugins or skillOverrides is not an object.
 It never deletes: a file in an installed skill's folder that the guide does not have is reported and left alone.
 It refuses (exit 2, nothing written) when ~/.claude/CLAUDE.md is not UTF-8 or its markers are not exactly one
 begin followed by one end: replacing text between broken markers could delete the owner's own instructions.
@@ -20,9 +25,11 @@ from pathlib import Path
 
 ROOT = Path(__file__).resolve().parent.parent
 HOME = Path.home() / ".claude"
+BOM = chr(0xFEFF)  # written as a code point so editors cannot strip it
 BEGIN, END = "<!-- claudecode-guide:begin -->", "<!-- claudecode-guide:end -->"
 check_only = "--check" in sys.argv
 with_global = "--global" in sys.argv
+with_settings = "--settings" in sys.argv
 differs = []
 
 
@@ -123,18 +130,53 @@ else:
         claude_md.write_bytes(updated.encode("utf-8"))
         print(f"installed  {claude_md} (global block){note}")
 
-# Settings: report only
+# Settings: the guide's plugin and skill defaults are merged with --settings; model and effort are reported only
 settings = HOME / "settings.json"
+defaults = json.loads((ROOT / "global" / "settings-defaults.json").read_text(encoding="utf-8"))
+data, problem, text = {}, None, ""
 if settings.exists():
     try:
-        data = json.loads(settings.read_text(encoding="utf-8-sig"))
-        model = data.get("model") if isinstance(data.get("model"), str) else None
-        per_model = (data.get("modelSettings") or {}).get(model or "", {}) or {}
-        effort = per_model.get("effortLevel") or data.get("effortLevel") or "(not set)"
-        hint = "" if model and model.startswith("claude-") else "  <- not a pinned model ID (see global/CLAUDE.md)"
-        print(f"settings   model={model or '(not set)'} effort={effort}{hint}")
-    except (ValueError, UnicodeDecodeError, AttributeError) as error:
-        print(f"settings   could not read {settings}: {error}")
+        text = settings.read_bytes().decode("utf-8")
+        data = json.loads(text.lstrip(BOM))
+    except (ValueError, UnicodeDecodeError) as error:
+        problem = str(error)
+    if problem is None and not isinstance(data, dict):
+        problem = "it is not a JSON object"
+    if problem is None and any(not isinstance(data.get(key, {}), dict) for key in defaults):
+        problem = f"one of {sorted(defaults)} is not an object"
+if problem:
+    if with_settings:
+        refuse(f"{settings}: {problem}; fix it first")
+    print(f"settings   could not read {settings}: {problem} (defaults not checked)")
+else:
+    drift = [f"{key}.{name}" for key, entries in defaults.items() for name, value in entries.items()
+             if data.get(key, {}).get(name) != value]
+    present = any(name in data.get(key, {}) for key, entries in defaults.items() for name in entries)
+    if not drift:
+        print(f"unchanged  {settings} (defaults)")
+    elif not present and not with_settings:
+        print(f"not set    {settings} (defaults not merged; optional, run with --settings)")
+    elif check_only:
+        differs.append(f"{settings} (defaults)")
+        print(f"differs    {settings} (defaults: {', '.join(drift)})")
+    elif not with_settings:
+        print(f"skipped    {settings} (defaults differ in {len(drift)} entries; run with --settings to merge them)")
+    else:
+        for key, entries in defaults.items():
+            data.setdefault(key, {}).update(entries)
+        nl = "\r\n" if "\r\n" in text else "\n"
+        body = json.dumps(data, indent=2, ensure_ascii=False).replace("\n", nl) + nl
+        HOME.mkdir(parents=True, exist_ok=True)
+        note = f" (backup: {backup(settings).name})" if settings.exists() else ""
+        settings.write_bytes(((BOM if text.startswith(BOM) else "") + body).encode("utf-8"))
+        print(f"installed  {settings} (defaults: {len(drift)} entries){note}")
+    model = data.get("model") if isinstance(data.get("model"), str) else None
+    model_settings = data.get("modelSettings") if isinstance(data.get("modelSettings"), dict) else {}
+    per_model = model_settings.get(model or "", {}) or {}
+    per_model = per_model if isinstance(per_model, dict) else {}
+    effort = per_model.get("effortLevel") or data.get("effortLevel") or "(not set)"
+    hint = "" if model and model.startswith("claude-") else "  <- not a pinned model ID (see global/CLAUDE.md)"
+    print(f"settings   model={model or '(not set)'} effort={effort}{hint}")
 
 if check_only and differs:
     sys.exit(1)

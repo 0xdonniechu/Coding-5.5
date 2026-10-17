@@ -1,0 +1,39 @@
+{
+  "enabledPlugins": {
+    "vercel-plugin@vercel": false,
+    "vercel@claude-plugins-official": false
+  },
+  "skillOverrides": {
+    "bto-create-skill": "user-invocable-only",
+    "bto-agent-team": "user-invocable-only",
+    "orchestration": "user-invocable-only",
+    "bto-teardown": "user-invocable-only",
+    "bto-researchmarket": "user-invocable-only",
+    "bto-page-quality": "user-invocable-only",
+    "bto-posthog": "user-invocable-only",
+    "bto-event-review": "user-invocable-only",
+    "reverse-engineer-anything": "user-invocable-only",
+    "computer-use": "user-invocable-only",
+    "find-skills": "user-invocable-only",
+    "orca-worktree-setup": "user-invocable-only",
+    "anthropic-skills:docx": "user-invocable-only",
+    "anthropic-skills:pdf": "user-invocable-only",
+    "anthropic-skills:pptx": "user-invocable-only",
+    "anthropic-skills:xlsx": "user-invocable-only",
+    "anthropic-skills:docs": "user-invocable-only",
+    "anthropic-skills:6-cong-thuc-viet-content-co-ban": "off",
+    "anthropic-skills:kich-ban-ads-duy-muoi": "off",
+    "anthropic-skills:mbs-dinh-huong-kenh": "off",
+    "anthropic-skills:membership-dinh-huong": "off",
+    "anthropic-skills:duy-muoi-transcript-to-brain": "off",
+    "anthropic-skills:phan-tich-co-phieu-vn": "off",
+    "anthropic-skills:phan-tich-crypto": "off",
+    "anthropic-skills:phantichdoithu": "off",
+    "anthropic-skills:morning": "off",
+    "anthropic-skills:google-workspace": "off",
+    "anthropic-skills:import-memory": "off",
+    "anthropic-skills:skill-creator": "off",
+    "bto-optimize-mac": "off",
+    "orca-linear": "off"
+  }
+}

@@ -1,8 +1,9 @@
 #!/usr/bin/env python3
-"""Checks the guide's files: agent frontmatter, pinned models, reviewer bodies, global and template sections, skills.
+"""Checks the guide's files: agent frontmatter, pinned models, reviewer bodies, global and template sections, skills, settings defaults.
 
 Run: python scripts/check.py   (exit 0 = PASS, 1 = FAIL). Standard library only.
 """
+import json
 import re
 import sys
 from pathlib import Path
@@ -14,6 +15,8 @@ TOOLS = {"Read", "Write", "Edit", "Glob", "Grep", "Bash", "PowerShell", "WebFetc
 AGENTS = {"builder", "reviewer", "hard-reviewer", "transcriber"}
 TEMPLATE_SECTIONS = ["## What it does", "## Verify", "## HARD", "## MEDIUM", "## EASY", "## Rules", "## Read when", "## Session state"]
 SKILLS = {"starter-kit", "handoff"}
+DEFAULT_KEYS = {"enabledPlugins", "skillOverrides"}
+OVERRIDES = {"on", "name-only", "user-invocable-only", "off"}
 DESCRIPTION_LIMIT = 1024  # the Agent Skills spec maximum; Claude Code's own cut-off is higher
 
 failures = []
@@ -110,6 +113,26 @@ for section in TEMPLATE_SECTIONS:
 if "## HARD" in template and "hard-reviewer" not in template.split("## HARD", 1)[1].split("\n", 1)[0]:
     fail("templates/project-CLAUDE.md: the HARD heading does not name hard-reviewer")
 
+defaults_text = read("global/settings-defaults.json")
+try:
+    defaults = json.loads(defaults_text) if defaults_text else {}
+except ValueError as error:
+    fail(f"global/settings-defaults.json: not valid JSON ({error})")
+    defaults = {}
+if not isinstance(defaults, dict) or set(defaults) - DEFAULT_KEYS:
+    fail(f"global/settings-defaults.json: only {sorted(DEFAULT_KEYS)} may be set; the rest of settings.json is the owner's")
+elif any(not isinstance(defaults.get(key, {}), dict) for key in DEFAULT_KEYS):
+    fail(f"global/settings-defaults.json: {sorted(DEFAULT_KEYS)} must each be an object")
+else:
+    for name, value in (defaults.get("enabledPlugins") or {}).items():
+        if not isinstance(value, bool):
+            fail(f"global/settings-defaults.json: enabledPlugins.{name} must be true or false")
+    for name, value in (defaults.get("skillOverrides") or {}).items():
+        if value not in OVERRIDES:
+            fail(f"global/settings-defaults.json: skillOverrides.{name} '{value}' is not one of {sorted(OVERRIDES)}")
+    if "starter-kit" in (defaults.get("skillOverrides") or {}) or "handoff" in (defaults.get("skillOverrides") or {}):
+        fail("global/settings-defaults.json: must not override the guide's own skills")
+
 skills = sorted(p.name for p in (ROOT / "skills").iterdir() if p.is_dir()) if (ROOT / "skills").is_dir() else []
 if set(skills) != SKILLS:
     fail(f"skills/: expected {sorted(SKILLS)}, found {skills}")
@@ -136,4 +159,4 @@ if failures:
     for f in failures:
         print(f"- {f}")
     sys.exit(1)
-print(f"PASS: {len(agents)} agents pinned, reviewer bodies equal, global matches the pinned models, template sections present, {len(skills)} skills valid")
+print(f"PASS: {len(agents)} agents pinned, reviewer bodies equal, global matches the pinned models, template sections present, {len(skills)} skills valid, settings defaults valid")

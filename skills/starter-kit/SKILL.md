@@ -62,7 +62,9 @@ typed. Day-to-day work uses `/handoff`.
 
 ### 4. Keep only what the repo needs
 - Do: follow `context-config.md`. Read, never edit, `enabledPlugins` and `skillOverrides` in
-  `~/.claude/settings.json`, and `claude mcp list` for the user-scope servers. Make two lists:
+  `~/.claude/settings.json`, and `claude mcp list` for the user-scope servers. Read the repo's own
+  `.claude/settings*.json` too: an entry there wins over the global one, and a `skillOverrides`
+  entry the `/skills` menu wrote that now matches the global value can be dropped. Make two lists:
   what the repo needs that is off, and what is on that the repo does not need. When the global
   defaults are not lean yet ("Global defaults" in `context-config.md`), say so in the report.
 - Merge into `.claude/settings.local.json` (read the old file first, keep every key):
@@ -141,6 +143,7 @@ typed. Day-to-day work uses `/handoff`.
 
 | Date | What happened | What changed |
 |---|---|---|
+| 2026-10-17 | Global defaults on the owner's machine (Vercel plugins off, one reverse-engineering MCP server moved to the catalog, 31 skill overrides, 14 of them `off`). `/context` in a new session: skills 45 → 25 and 8.4k → 3.8k tokens; MCP tools 38, 640 tokens. Overrides apply to personal and claude.ai-synced skills; the `/skills` menu wrote its toggles into one repo's local settings | `context-config.md`: overrides verified, synced-skill keys, menu scope, shared-account rule |
 | 2026-10-17 | Trial in a fresh agent on a scratch Node repo: step 4 could only turn things on, so nothing got smaller while the global defaults were not lean; MEDIUM never asked; `settings.local.json` ignored only by global git config; the global email would have reached the first commit | Step 4 makes "needs" and "does not need" lists; MEDIUM question; the repo `.gitignore` always gets both lines; step 1 flags the global email |
 | 2026-10-17 | Created from eight ways of keeping context small | v1 |
 
