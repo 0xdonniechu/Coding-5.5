@@ -5,8 +5,8 @@ The global instructions, four subagents, the project `CLAUDE.md` template and tw
 Cost of a bug: every session on every machine follows these files. A wrong rule rates HARD work as EASY, lets an unreviewed change through, or swaps a model without a decision. The bar: `check.py` green, the installed copy equal to the repo, and the owner's approval for any change of model, rating or review rule.
 
 ## Verify
-- `python scripts/check.py`: agent frontmatter, models pinned to full IDs, `hard-reviewer` body equal to `reviewer` body, the global agent list, the template's sections, skill frontmatter (name, description length, no `: `, `starter-kit` invoked by hand only, the template kept only in `templates/`).
-- `python scripts/install.py --check`: this machine's `~/.claude/agents`, `~/.claude/skills` (and the global block, if installed) equal the repo (a file only in an installed skill folder is reported as `extra`, not counted); exit 0 equal, 1 differs, 2 refused (`~/.claude/CLAUDE.md` is not UTF-8 or its markers are broken: fix by hand). Run after every merge, on every machine.
+- `python scripts/check.py`: agent frontmatter, models pinned to full IDs, `hard-reviewer` body equal to `reviewer` body, the global agent list, the template's sections, skill frontmatter (name, description length, no `: `, `starter-kit` invoked by hand only, the template kept only in `templates/`), `global/settings-defaults.json` (only `enabledPlugins` and `skillOverrides`, valid values, not the guide's own skills).
+- `python scripts/install.py --check`: this machine's `~/.claude/agents`, `~/.claude/skills` (and the global block and settings defaults, if installed) equal the repo (a file only in an installed skill folder is reported as `extra`, not counted); exit 0 equal, 1 differs, 2 refused (`~/.claude/CLAUDE.md` is not UTF-8 or its markers are broken, or with `--settings` `settings.json` is not a JSON object: fix by hand). Run after every merge, on every machine.
 - A change to an agent's behaviour: start a new session, `/agents`, run the agent once on a known diff, and record what it returned in the PR.
 - A change to a skill's steps: run it once in a fresh agent on a scratch repo, given only the skill, and record in the PR where it had to guess.
 
@@ -14,7 +14,8 @@ Cost of a bug: every session on every machine follows these files. A wrong rule 
 - The model choice and switching: the "Current choice" line, any agent's `model:` or `effort:`, the switch test.
 - Task rating (EASY / MEDIUM / HARD), the review loop, who may commit or merge, the honesty rules.
 - The reviewers' checklist and their PASS/FAIL rule.
-- The installer's writes to `~/.claude` (backups, the marker block, skill folders; it never edits `settings.json` and never deletes).
+- The installer's writes to `~/.claude` (backups, the marker block, skill folders, and with `--settings` the entries of `global/settings-defaults.json` in `settings.json`, nothing else there; it never sets the model and never deletes).
+- `global/settings-defaults.json`: what is off or hand-invoked on every machine.
 
 ## MEDIUM: builder builds, reviewer reviews
 - Builder and transcriber wording that changes what they do or when they stop; the template's sections; a skill's steps or stop points; `check.py`.
