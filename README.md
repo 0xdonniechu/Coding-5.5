@@ -1,6 +1,6 @@
 # Coding 5.5
 
-How to run Claude Code: one model economy for every repo, the subagents it relies on, the template each repo's `CLAUDE.md` follows, and the skills that set up a repo and keep its sessions' context small. Private.
+How to run Claude Code: one model economy for every repo, the subagents it relies on, the template each repo's `CLAUDE.md` follows, and the skills that set up a repo and keep its sessions' context small. Public.
 
 ## What is in it
 
@@ -15,6 +15,10 @@ How to run Claude Code: one model economy for every repo, the subagents it relie
 | `global/settings-defaults.json` | `~/.claude/settings.json`, with `--settings` | The `enabledPlugins` and `skillOverrides` every machine shares: rarely used plugins off, skills unrelated to coding off or invoked by hand only. Every other value in `settings.json` keeps its value; the file is re-written as 2-space JSON, backed up first |
 | `skills/starter-kit/` | `~/.claude/skills/` | `/starter-kit`, run once per repo: CLAUDE.md from the template, git identity, only the plugins, MCP servers and skills the repo needs, HANDOFF.md gitignored, tracker project. Invoked by hand only, so it costs no context |
 | `skills/handoff/` | `~/.claude/skills/` | `/handoff`: `save` writes where the work stands to HANDOFF.md before `/clear`; `resume` reads only that file in the new session |
+| `skills/market-research/` | `~/.claude/skills/` | `/market-research`: competitors, US/USD prices, 1-2 star reviews, TAM/SAM/SOM, company profiles, Value x Features chart (`assets/positioning_chart.py`) |
+| `skills/teardown/` | `~/.claude/skills/` | `/teardown`: clean-room two-team product teardown, the wall test run as a loop until nothing blocks |
+| `skills/sdlc/` | `~/.claude/skills/` | `/sdlc`: intent -> plan -> build -> verify -> ship, with ticket/PR/review conventions |
+| `skills/orca-worktree-setup/` | `~/.claude/skills/` | `/orca-worktree-setup`: Orca Setup Script so a new worktree gets its gitignored local files |
 
 Every model is pinned to a full model ID, never an alias, so an upgrade is always a decision (`global/CLAUDE.md`, "Switching models"). The main session's model and effort live in `~/.claude/settings.json` (`"model": "claude-opus-5-5"`, and `high` effort under `modelSettings`). The installer only reports them; the owner sets them.
 
@@ -42,3 +46,7 @@ Agents and skills load when a session starts: after installing, start a new sess
 ## Keeping context small
 
 Plans, decisions and dead ends go in files, not in the chat; the chat holds only the current state. `/handoff` writes that state before `/clear`, and the template's "Session state" section makes every new session read it first. `/starter-kit` keeps the part sent on every turn short: a lean `CLAUDE.md` (module detail in `docs/`, listed under "Read when", never `@import`ed), and only the plugins, MCP servers and skills the repo uses. `skills/starter-kit/context-config.md` says what each turn carries and how to turn things off globally and on per repo.
+
+## Sources
+
+`market-research`, `teardown` and `sdlc` started from `bto-researchmarket`, `bto-teardown` and `bto-sdlc` in [sonpiaz/bto-skills](https://github.com/sonpiaz/bto-skills) (MIT, (c) 2026 Son Piaz; licence in `skills/LICENSE-bto-skills`), then changed from real use (history in `skills/CHANGELOG-claude-skills.md`).

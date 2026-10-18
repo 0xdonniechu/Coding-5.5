@@ -1,7 +1,7 @@
 # Coding 5.5: how every repo runs Claude Code (GitHub 0xdonniechu/Coding-5.5)
 
 ## What it is
-The global instructions, four subagents, the project `CLAUDE.md` template and two skills (`starter-kit`, `handoff`) that every repo works with, plus a check script and an installer. Private. Standard library Python only. Owner decisions are in `intent/2026-10-16-claudecode-guide.md`.
+The global instructions, four subagents, the project `CLAUDE.md` template two skills (`starter-kit`, `handoff`) that every repo works with, four task skills (`market-research`, `teardown`, `sdlc`, `orca-worktree-setup`, merged from the old `claude-skills` repo), plus a check script and an installer. Public. Standard library Python only. Owner decisions are in `intent/2026-10-16-claudecode-guide.md`.
 Cost of a bug: every session on every machine follows these files. A wrong rule rates HARD work as EASY, lets an unreviewed change through, or swaps a model without a decision. The bar: `check.py` green, the installed copy equal to the repo, and the owner's approval for any change of model, rating or review rule.
 
 ## Verify
