@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Value × functionality positioning chart + ranking table for the market-research skill.
+"""Value × functionality positioning chart + descriptive score table for the market-research skill.
 
 Usage:
     python3 positioning_chart.py data.json --out chart.svg [--inline chart.inline.svg] [--table table.md]
@@ -150,7 +150,7 @@ def build(data, inline):
 
 
 def table(allpts):
-    rows = ["| Product | Functionality | Effective $/yr | Value | Price basis |", "|---|---|---|---|---|"]
+    rows = ["| Product | Rubric points | Effective $/yr | Points per $10/year | Price basis |", "|---|---|---|---|---|"]
     for p in sorted(allpts, key=lambda p: -p["value"]):
         name = f'*{p["name"]} (hypothesis)*' if p["kind"] == "candidate" else p["name"]
         rows.append(f'| {name} | {p["functionality"]:g} | {p["effective_per_year"]:.2f} | {p["value"]:.1f} | {p.get("basis", "candidate price")} |')
